@@ -14,16 +14,21 @@ async function busBoard() {
     let nextBus = arrivalPrediction[i].lineName;
     let nextBusArrival = arrivalPrediction[i].timeToStation;
         
-    console.log(`${i+1} - Bus Number ${nextBus} arrives in ${nextBusArrival} seconds`);
-        /* Experimenting turning time in seconds to time in minutes 
-        arrivalInMins(arrivalPrediction[i].timeToStation);
-        */
+    let timeString = arrivalInMins(nextBusArrival);
+    console.log(`${i+1} - Bus Number ${nextBus} arrives in ${nextBusArrival} seconds (${timeString})` );
   }
 }
 
 function getUserInput() {
   console.log("Please enter a stop code: ");
 	return readline.prompt();
+}
+
+function arrivalInMins(timeInSeconds) {
+	let timeInMinutes = Math.floor(timeInSeconds/60);
+	let secondsLeft = Math.floor(timeInSeconds % 60);
+	let timeString = `${timeInMinutes} minutes, ${secondsLeft} seconds`;
+	return timeString;
 }
 
 busBoard();
