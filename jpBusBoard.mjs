@@ -28,8 +28,9 @@ async function getNearestBusStops(location) {
   const nearestBusStopsData = await fetchDataFromApi(`https://api.tfl.gov.uk/StopPoint/?lat=${location.lat}&lon=${location.lon}&stopTypes=NaptanPublicBusCoachTram&radius=500`);
   const nearestBusStops = nearestBusStopsData.stopPoints;
   nearestBusStops.sort((stopPointA, stopPointB) => stopPointA.distance - stopPointB.distance);
-  
-  return nearestBusStops.map((stopPoint) => {
+  const nearestTwoStops = nearestBusStops.slice(0,2);
+
+  return nearestTwoStops.map((stopPoint) => {
     return {
       naptanId: stopPoint.naptanId,
       stopLetter: stopPoint.stopLetter,
@@ -41,13 +42,7 @@ async function getNearestBusStops(location) {
 
 async function getArrivalPredictions(busStopCode) {
   const arrivalPrediction = await fetchDataFromApi(`https://api.tfl.gov.uk/StopPoint/${busStopCode}/Arrivals?=${apikey}`);
-  for(let i=0; i < arrivalPrediction.length && i<5; i++){
-    let nextBus = arrivalPrediction[i].lineName;
-    let nextBusArrival = arrivalPrediction[i].timeToStation;
-        
-    let timeString = arrivalInMins(nextBusArrival);
-    console.log(`${i+1} - Bus Number ${nextBus} arrives in ${nextBusArrival} seconds (${timeString})` );
-  }
+  return arrivalPrediction;
 }
 
 function arrivalInMins(timeInSeconds) {
@@ -57,12 +52,23 @@ function arrivalInMins(timeInSeconds) {
   return timeString;
 }
 
+function displayBusArrivals(predictions, busStopName) {
+  console.log(`\n Next arrivals at Bus Stop: ${busStopName}`);
+  for(let i=0; i<predictions.length && i<5; i++) {
+    const arrival = predictions[i];
+    console.log(`Bus Number ${arrival.lineName} arriving in ${arrival.timeInSeconds} seconds`);
+  }
+}
+
 async function busBoard() {
   const userInput = getUserInput("Please enter your postcode: ");
   const postcodeLocation = await getLatLongFromPostcode(userInput);
   const nearestBusStops = await getNearestBusStops(postcodeLocation);
-  console.log(nearestBusStops);
-  console.log(`**************************************************************`)
+
+  for(let i=0; i<2 && i<nearestBusStops.length; i++) {
+    const busArrivalPredictions = await getArrivalPredictions(nearestBusStops[i].naptanId);
+    displayBusArrivals(busArrivalPredictions, nearestBusStops[i].stopName);
+  }
 }
 
 busBoard();
