@@ -56,7 +56,8 @@ function displayBusArrivals(predictions, busStopName) {
   console.log(`\n Next arrivals at Bus Stop: ${busStopName}`);
   for(let i=0; i<predictions.length && i<5; i++) {
     const arrival = predictions[i];
-    console.log(`Bus Number ${arrival.lineName} arriving in ${arrival.timeInSeconds} seconds`);
+    const timeInMinutes = arrivalInMins(arrival.timeToStation);
+    console.log(`Bus Number ${arrival.lineName} arriving in ${timeInMinutes}`);
   }
 }
 
