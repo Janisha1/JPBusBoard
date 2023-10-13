@@ -3,13 +3,15 @@ import readline from "readline-sync";
 
 const apikey = process.env.NODE_TFL_API_KEY;
 
-async function busBoard() {
-//   const busStopCode = '490008660N';
-  const busStopCode = getUserInput();
-
-	const busArrivalResponse = await fetch (`https://api.tfl.gov.uk/StopPoint/490008660N/Arrivals?=${apikey}`);
+async function fetchDataFromApi(url) {
+  const busArrivalResponse = await fetch (url);
   const arrivalPrediction = await busArrivalResponse.json();
 
+  return arrivalPrediction;
+}
+
+async function getArrivalPredictions(busStopCode) {
+  const arrivalPrediction = await fetchDataFromApi(`https://api.tfl.gov.uk/StopPoint/${busStopCode}/Arrivals?=${apikey}`);
   for(let i=0; i < arrivalPrediction.length && i<5; i++){
     let nextBus = arrivalPrediction[i].lineName;
     let nextBusArrival = arrivalPrediction[i].timeToStation;
@@ -19,16 +21,16 @@ async function busBoard() {
   }
 }
 
-function getUserInput() {
-  console.log("Please enter a stop code: ");
-	return readline.prompt();
+function arrivalInMins(timeInSeconds) {
+  let timeInMinutes = Math.floor(timeInSeconds/60);
+  let secondsLeft = Math.floor(timeInSeconds % 60);
+  let timeString = `${timeInMinutes} minutes, ${secondsLeft} seconds`;
+  return timeString;
 }
 
-function arrivalInMins(timeInSeconds) {
-	let timeInMinutes = Math.floor(timeInSeconds/60);
-	let secondsLeft = Math.floor(timeInSeconds % 60);
-	let timeString = `${timeInMinutes} minutes, ${secondsLeft} seconds`;
-	return timeString;
+async function busBoard() {
+  const busStopCode = '490008660N';
+  getArrivalPredictions(busStopCode);
 }
 
 busBoard();
